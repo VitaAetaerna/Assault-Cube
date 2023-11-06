@@ -1,7 +1,16 @@
 #include "includes.h"
+//Process ID and base Module
+DWORD pID, baseModule;
+
+//Pointer
+DWORD localPlayerPointer;
+//Health Pointer = 0xEC
+
+//Values
+int healthToSet = 999;
+int currentHealth;
 int main(){
-	DWORD pID, baseModule, localPlayerPointer;
-	int health = 9999;
+	
 	//Get Process ID and Base Address
 	pID = getProcessID(L"ac_client.exe");
 	baseModule = GetModuleBaseAddress(pID, L"ac_client.exe");
@@ -16,7 +25,13 @@ int main(){
 	std::cout << "Local Player Addr: " << std::hex << localPlayerPointer << std::endl;
 
 	while (true) {
-		WriteProcessMemory(handle, (LPVOID)(localPlayerPointer + 0xEC), &health, sizeof(health), nullptr);
+		//Read Process memory for current Health | storing it in currentHealth
+		ReadProcessMemory(handle, (LPVOID)(localPlayerPointer + 0xEC), &currentHealth, sizeof(currentHealth), nullptr);
+		if (currentHealth < 100) {
+			//Write healthToSet into Memory Address of Health
+			WriteProcessMemory(handle, (LPVOID)(localPlayerPointer + 0xEC), &healthToSet, sizeof(&healthToSet), nullptr);
+			std::cout << "Health changed to " << healthToSet << std::endl;
+		}
 	}
 
 }
